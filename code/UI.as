@@ -5,6 +5,7 @@
 	import flash.net.URLLoader; 
 	import flash.net.URLLoaderDataFormat; 
 	import flash.net.URLRequest;
+	import flash.net.URLRequestHeader;
 	import flash.net.URLRequestMethod;
 	import flash.utils.getTimer;
 	
@@ -23,21 +24,23 @@
 		//event handler
 		function onClick(event:MouseEvent):void
 		{
-		   HttpLoad(input_text.text);
+		   doHttpLoad(input_text.text);
 		}
 		
-		function HttpLoad(url:String) 
+		function doHttpLoad(url:String) 
 		{ 
 			var request:URLRequest = new URLRequest(url); 
 			request.contentType = "text/html"; 
 			request.method = URLRequestMethod.GET; 
 			var loader:URLLoader = new URLLoader(); 
-			loader.addEventListener(IOErrorEvent.IO_ERROR, httpLoaderIOErrorHandler);
 			loader.dataFormat = URLLoaderDataFormat.TEXT; 
+			loader.addEventListener(HTTPStatusEvent.HTTP_RESPONSE_STATUS, httpStatusHandler);
+			loader.addEventListener(IOErrorEvent.IO_ERROR, httpLoaderIOErrorHandler);
 			loader.addEventListener(Event.COMPLETE, completeHandler); 
 			try 
 			{ 
 				status_label.text = "Sending request to: "+input_text.text+"\n";
+				output_text.text = "";
 				timed = getTimer();
 				loader.load(request); 
 			}  
@@ -48,11 +51,30 @@
 			} 
 		} 
 		
+		function httpStatusHandler(event:HTTPStatusEvent):void
+		{
+			var httpStatus:String = "";
+			//status
+			httpStatus += "Status code: " + String(event.status) + "\n";
+			//responseURL
+			httpStatus += "Response URL: " + event.responseURL + "\n";
+			//URLRequestHeader 
+			httpStatus += "Headers:\n";
+			var headers:Array = event.responseHeaders;
+			for(var i:uint = 0; i<headers.length; i++)
+			{
+				httpStatus += "    " + headers[i].name + ": " + headers[i].value + "\n";
+			}
+			httpStatus += "\n";
+			output_text.text = httpStatus;
+			
+		}
+		
 		function completeHandler(event:Event):void 
 		{ 
 			var loader:URLLoader = URLLoader(event.target); 
 			//trace(loader.data); 
-			output_text.text = loader.data;
+			output_text.text += loader.data;
 			status_label.text = "Time: " + (getTimer() - timed) + " ms";
 		} 
 		
