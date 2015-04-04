@@ -7,6 +7,7 @@
 	import flash.net.URLRequest;
 	import flash.net.URLRequestHeader;
 	import flash.net.URLRequestMethod;
+	import flash.net.dns.*;
 	import flash.utils.getTimer;
 	
 	public class UI extends MovieClip
@@ -24,7 +25,8 @@
 		//event handler
 		function onClick(event:MouseEvent):void
 		{
-		   doHttpLoad(input_text.text);
+			output_text.text = "";
+			doDNSQuery(input_text.text);
 		}
 		
 		function doHttpLoad(url:String) 
@@ -39,8 +41,7 @@
 			loader.addEventListener(Event.COMPLETE, completeHandler); 
 			try 
 			{ 
-				status_label.text = "Sending request to: "+input_text.text+"\n";
-				output_text.text = "";
+				status_label.text = "Sending HTTP request to: "+input_text.text+"\n";
 				timed = getTimer();
 				loader.load(request); 
 			}  
@@ -73,14 +74,47 @@
 		function completeHandler(event:Event):void 
 		{ 
 			var loader:URLLoader = URLLoader(event.target); 
+			status_label.text = "Http time: " + (getTimer() - timed) + " ms";
 			//trace(loader.data); 
 			output_text.text += loader.data;
-			status_label.text = "Time: " + (getTimer() - timed) + " ms";
+			
 		} 
 		
-		function httpLoaderIOErrorHandler(event:Event):void 
+		function httpLoaderIOErrorHandler(event:IOErrorEvent):void 
 		{ 
-			status_label.text = "Error: "+event+"\n";
+			status_label.text = "Error: " + event.toString() + "\n";
 		} 
+		
+		function doDNSQuery(url:String):void
+		{
+			var resolver:DNSResolver = new DNSResolver();
+			resolver.addEventListener(DNSResolverEvent.LOOKUP, dnsLookupHandler);
+			resolver.addEventListener(ErrorEvent.ERROR, dnsErrorHandler);
+			status_label.text = "Sending DNS request for: "+input_text.text+"\n";
+			timed = getTimer();
+			resolver.lookup(url, ARecord);
+		}
+		
+		function dnsLookupHandler(event:DNSResolverEvent):void
+		{
+			status_label.text = "Dns Time: " + (getTimer() - timed) + " ms";
+			var dnsResult:String = "";
+			dnsResult += "Query string: " + event.host + "\n";
+			for each( var record in event.resourceRecords )
+			{
+				if( record is ARecord ) dnsResult += "    " + ( record.name + " : " + record.address ) + "\n";
+				if( record is AAAARecord ) dnsResult += "    " + ( record.name + " : " + record.address ) + "\n";
+				if( record is MXRecord ) dnsResult += "    " + ( record.name + " : " + record.exchange + ", " + record.preference ) + "\n";
+				if( record is PTRRecord ) dnsResult += "    " + ( record.name + " : " + record.ptrdName ) + "\n";
+				if( record is SRVRecord ) dnsResult += "    " + ( record.name + " : " + record.target + ", " + record.port +
+					", " + record.priority + ", " + record.weight ) + "\n";
+			}
+			output_text.text += dnsResult;
+		}
+		
+		function dnsErrorHandler(event:ErrorEvent):void
+		{
+			status_label.text = "Error: " + event.toString() + "\n";
+		}
 	}
 }
