@@ -33,6 +33,7 @@ package experiment
 			{
 				throw new ArgumentError("did not set callback method");
 			}
+			this.domainname = domain;
 			var resolver:DNSResolver = new DNSResolver();
 			resolver.addEventListener(DNSResolverEvent.LOOKUP, dnsLookupHandler);
 			resolver.addEventListener(ErrorEvent.ERROR, dnsErrorHandler);
@@ -44,7 +45,8 @@ package experiment
 			catch (error:Error)
 			{
 				//status_label.text = "Error: please check your input!\n";
-				var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, this.domainname, "FAILURE", "", "input error", "");
+				var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, this.domainname, "FAILURE", "", "input error", "", "");
+				this.ongoing = false;
 				this.callback(result);
 			}
 		}
@@ -62,7 +64,7 @@ package experiment
 		{
 			var time_diff:int = getTimer() - timed;
 			//status_label.text = "DNS Time: " + time_diff + " ms";
-			var extrainfo:String = "Time:"+String(time_diff);
+			//var extrainfo:String = "Time:"+String(time_diff);
 			var dnsResult:String = "";
 			dnsResult +=  "Query string: " + event.host + "\n";
 			for each (var record:* in event.resourceRecords)
@@ -92,14 +94,16 @@ package experiment
 				}
 			}//end of for each loop
 			//output_text.text +=  dnsResult;
-			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, this.domainname, "SUCCESS", "", dnsResult, extrainfo);
+			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, this.domainname, "SUCCESS", "", dnsResult, "", String(time_diff));
+			this.ongoing = false;
 			this.callback(result);
 		}
 
 		private function dnsErrorHandler(event:DNSResolverEvent):void
 		{
 			//status_label.text = "Error: " + event.toString() + "\n";
-			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, this.domainname, "FAILURE", "", event.toString(), "");
+			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, this.domainname, "FAILURE", "", event.toString(), "", "");
+			this.ongoing = false;
 			this.callback(result);
 		}
 	}

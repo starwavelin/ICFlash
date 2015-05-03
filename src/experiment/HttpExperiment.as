@@ -7,6 +7,7 @@ package experiment
 	import flash.net.URLRequestHeader;
 	import flash.net.URLRequestMethod;
 	import flash.utils.getTimer;
+	import flash.utils.Timer;
 	/**
 	 * ...
 	 * @author ...
@@ -23,6 +24,9 @@ package experiment
 		private var responseheader:String;
 		private var httpstatuscode:String;
 		private var timed:int;
+		
+		private var loader:URLLoader;
+		private var timer:Timer;
 		
 		public function HttpExperiment() 
 		{
@@ -53,11 +57,13 @@ package experiment
 			var request:URLRequest = new URLRequest(url_fullform);
 			request.contentType = "text/html";
 			request.method = URLRequestMethod.GET;
-			var loader:URLLoader = new URLLoader();
+			loader = new URLLoader();
 			loader.dataFormat = URLLoaderDataFormat.TEXT;
 			loader.addEventListener(HTTPStatusEvent.HTTP_RESPONSE_STATUS, httpStatusHandler);
 			loader.addEventListener(IOErrorEvent.IO_ERROR, httpLoaderIOErrorHandler);
 			loader.addEventListener(Event.COMPLETE, httpCompleteHandler);
+			timer = new Timer(5000, 1);
+			timer.addEventListener(TimerEvent.TIMER_COMPLETE, timerExpireHandler);
 			try
 			{
 				this.timed = getTimer();
@@ -67,7 +73,8 @@ package experiment
 			{
 				//status_label.text = "Error: please check your input!\n";
 				//trace("Unable to load URL:" + error);
-				var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, currenturl, "FAILURE", "", "input error", "");
+				var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, currenturl, "FAILURE", "", "input error", "", "");
+				this.ongoing = false;
 				this.callback(result);
 			}
 		}
@@ -83,6 +90,11 @@ package experiment
 
 		private function httpStatusHandler(event:HTTPStatusEvent):void
 		{
+			if (!ongoing)
+			{
+				return;
+			}
+			timer.stop();
 			var httpStatus:String = "";
 			//status
 			//httpStatus +=  "Status Code: " + String(event.status) + "\n";
@@ -104,20 +116,43 @@ package experiment
 
 		private function httpLoaderIOErrorHandler(event:IOErrorEvent):void
 		{
+			if (!ongoing)
+			{
+				return;
+			}
+			timer.stop();
 			//status_label.text = "Error: " + event.toString() + "\n";
-			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, currenturl, "FAILURE", "", event.toString(), "");
+			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, currenturl, "FAILURE", "", event.toString(), "", "");
+			this.ongoing = false;
 			this.callback(result);
 		}
 
 		private function httpCompleteHandler(event:Event):void
 		{
+			if (!ongoing)
+			{
+				return;
+			}
+			timer.stop();
 			var loader:URLLoader = URLLoader(event.target);
 			var time_diff:int = getTimer() - this.timed;
 			//status_label.text = "Http time: " + time_diff + " ms";
 			//trace(loader.data);
 			//output_text.text +=  loader.data;
-			this.responseheader += "ResponseTime:" + String(time_diff) + ",";
-			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, currenturl, "SUCCESS", this.httpstatuscode, loader.data, this.responseheader);
+			//this.responseheader += "ResponseTime:" + String(time_diff) + ",";
+			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, currenturl, "SUCCESS", this.httpstatuscode, loader.data, this.responseheader, String(time_diff));
+			this.ongoing = false;
+			this.callback(result);
+		}
+		
+		private function timerExpireHandler(event:TimerEvent):void
+		{
+			if (!ongoing)
+			{
+				return;
+			}
+			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, currenturl, "FAILURE", "", "Timeout", "", "5000");
+			this.ongoing = false;
 			this.callback(result);
 		}
 	}

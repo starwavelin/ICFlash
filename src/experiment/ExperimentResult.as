@@ -13,8 +13,9 @@ package experiment
 		private var returncode:String;
 		private var resultbody:String;
 		private var extrainfo:String;
+		private var finishtime:String;
 		
-		public function ExperimentResult(id:String,ver:String,args:String,status:String,error:String,body:String,extra:String) 
+		public function ExperimentResult(id:String,ver:String,args:String,status:String,error:String,body:String,extra:String,time:String) 
 		{
 			this.description = id;
 			this.version = ver;
@@ -23,6 +24,7 @@ package experiment
 			this.returncode = error;
 			this.resultbody = body;
 			this.extrainfo = extra;
+			this.finishtime = time;
 		}
 		
 		/* Experiment identification */
@@ -65,6 +67,11 @@ package experiment
 		public function get extra():String
 		{
 			return this.extrainfo;
+		}
+		
+		public function get time():String
+		{
+			return this.finishtime;
 		}
 		
 		/* Json representation */

@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<gallery>
+    <photo src='alcatraz.jpg' caption='Alcatraz Island' place='San Francisco'/>
+    <photo src='bigben.jpg' caption='Big Ben' place='London'/>
+    <photo src='bourbonstreet.jpg' caption='Bourbon Street' place='New Orleans' />
+    <photo src='buckinghampalace.jpg' caption='Buckingham Palace' place='London' />
+    <photo src='cablecars.jpg' caption='Cable Cars' place='San Francisco'/>
+    <photo src='cathedralpeak.jpg' caption='Cathedral Peak' place='Yosemite' />
+    <photo src='coittower.jpg' caption='Coit Tower' place='San Francisco' />
+    <photo src='conservatoryofflowers.jpg' caption='Conservatory of Flowers' place='San Francisco'/>
+    <photo src='crawfish.jpg' caption='Crawfish' place='New Orleans' />
+    <photo src='elcapitan.jpg' caption='El Capitan' place='Yosemite' />
+    <photo src='fishermanswharf.jpg' caption='Fisherman&apos;s Wharf' place='San Francisco' />
+    <photo src='halfdome.jpg' caption='Half Dome' place='Yosemite' />
+    <photo src='lombardstreet.jpg' caption='Lombard Street' place='San Francisco'/>
+    <photo src='londonbridge.jpg' caption='London Bridge'  place='London' />
+    <photo src='londonunderground.jpg' caption='London Underground'  place='London'/>
+    <photo src='palaceoffinearts.jpg' caption='Palace of Fine Arts' place='San Francisco' />
+    <photo src='riverboat.jpg' caption='Riverboat' place='New Orleans' />
+    <photo src='saintpauls.jpg' caption='Saint Paul%27s Cathedral'  place='London' />
+    <photo src='statue.jpg' caption='New Orleans Statue' place='New Orleans'/>
+    <photo src='towerbridge.jpg' caption='Tower Bridge'  place='London' />
+    <photo src='toweroflondon.jpg' caption='Tower of London'  place='London' />
+    <photo src='tuolomne.jpg' caption='Tuolumne Meadows' place='Yosemite' />
+    <photo src='yosemitefalls.jpg' caption='Yosemite Falls' place='Yosemite' />
+</gallery>

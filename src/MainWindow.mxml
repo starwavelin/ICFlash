@@ -12,8 +12,23 @@
 	
 	<fx:Script>
 		<![CDATA[
+		import mx.collections.*; 
+		
+		[Bindable]
+		public var url_list_data:ArrayList = new ArrayList([
+			"www.google.com",
+			"www.facebook.com",
+			"www.cnn.com",
+			"www.msn.com",
+			"www.baidu.com"
+		]);
+
+		[Bindable] 
+		public var result_grid_data:ArrayList; 
+		
 		private function main():void 
 		{
+			result_grid_data = new ArrayList();
 			windows_initialized();
 		}
 		]]>
@@ -23,27 +38,79 @@
 		<s:layout>
 			<s:VerticalLayout/>
 		</s:layout>
+		<!-- Input test parameters -->
 		<s:Group id="input_group">
-			<s:layout>
-				<s:HorizontalLayout></s:HorizontalLayout>
-			</s:layout>
-			<s:Label text="Host" width="60"></s:Label>
-			<s:TextInput id="input_text" text="" width="400"></s:TextInput>
-			<s:DropDownList id="method_dropdown" selectedIndex="0" width="80">
-				<s:dataProvider>
-					<s:ArrayList source="[HTTP,DNS]" />
-				</s:dataProvider>	
-			</s:DropDownList>
-			<s:Button id="test_button" label="Test"></s:Button>
+			<mx:TabNavigator id="input_tab_group">
+				<mx:VBox label="Auto" id="input_tab_tab1">
+					<s:Group width="600">
+						<s:layout>
+							<s:HorizontalLayout></s:HorizontalLayout>
+						</s:layout>
+						<s:List dataProvider="{url_list_data}" width="500" height="90"> 
+							<!--<mx:ArrayCollection>
+								<fx:String>www.google.com</fx:String> 
+								<fx:String>www.facebook.com</fx:String> 
+								<fx:String>www.cnn.com</fx:String> 
+								<fx:String>www.msn.com</fx:String> 
+							</mx:ArrayCollection>-->
+						</s:List>
+						<s:Group>
+							<s:layout>
+								<s:VerticalLayout></s:VerticalLayout>
+							</s:layout>
+							<s:Button id="test2_button" label="Test" tabIndex="14" width="80" click="test2_button_onclick(event);"></s:Button>
+							<s:DropDownList id="method2_dropdown" selectedIndex="0" tabIndex="19" width="80">
+								<s:dataProvider>
+									<s:ArrayList source="[HTTP,DNS]" />
+								</s:dataProvider>	
+							</s:DropDownList>
+						</s:Group>
+					</s:Group>
+				</mx:VBox>
+				<mx:VBox label="Manual" id="input_tab_tab2" height="100">
+					<s:Group>
+						<s:layout>
+							<s:HorizontalLayout></s:HorizontalLayout>
+						</s:layout>
+						<s:Label text="Host"></s:Label>
+						<s:TextInput id="input_text" text="" tabIndex="5" width="360"></s:TextInput>
+						<s:DropDownList id="method_dropdown" selectedIndex="0" tabIndex="10" width="80">
+							<s:dataProvider>
+								<s:ArrayList source="[HTTP,DNS]" />
+							</s:dataProvider>	
+						</s:DropDownList>
+						<s:Button id="test_button" label="Test" tabIndex="15" click="test_button_onclick(event);"></s:Button>
+					</s:Group>
+				</mx:VBox>
+			</mx:TabNavigator>
 		</s:Group>	
+		<!-- Display test results -->
 		<s:Group id="output_group">
-			<s:layout>
-				<s:HorizontalLayout></s:HorizontalLayout>
-			</s:layout>
-			<s:Label text="Result" width="60"></s:Label>
-			<s:TextArea id="output_text" text="" widthInChars="40"></s:TextArea>
-			<s:Button id="upload_button" label="Upload"></s:Button>
+			<s:Panel title="Result">
+				<s:layout>
+					<s:VerticalLayout></s:VerticalLayout>
+				</s:layout>
+				<s:DataGrid id="result_grid" dataProvider="{result_grid_data}" width="600" height="120" selectionChange="display_result_detail(event);"> 
+					<s:columns>
+						<s:ArrayList>
+							<s:GridColumn dataField="input"/>
+							<s:GridColumn dataField="status"/>
+							<s:GridColumn dataField="time" width="50" />
+							<s:GridColumn dataField="uploaded" width="80"/>
+						</s:ArrayList>
+					</s:columns>
+				</s:DataGrid> 
+				<s:TextArea id="output_text" text="" tabIndex="20" width="600" height="90"></s:TextArea>
+				<s:Group>
+					<s:layout>
+						<s:HorizontalLayout></s:HorizontalLayout>
+					</s:layout>
+					<s:Button id="upload_button" label="Upload" tabIndex="25" click="upload_button_onclick(event);"></s:Button>
+					<s:Button id="clearresult_button" label="Clear" tabIndex="30" click="clearresult_button_onclick(event);"></s:Button>
+				</s:Group>
+			</s:Panel>
 		</s:Group>
+		<!-- Status -->
 		<s:Group id="status_group">
 			<s:layout>
 				<s:HorizontalLayout></s:HorizontalLayout>

@@ -16,6 +16,9 @@
 		private var userName:String;
 		private var passWord:String;
 		
+		//(error:int,data:string) - error 0 for success, <0 for failure
+		private var callback:Function;
+		
 		public function Upload(url:String,username:String,password:String)
 		{
 			this.serverUrl = url;
@@ -35,9 +38,10 @@
 			sendGetRequest(this.serverUrl+"results",true);
 		}
 		
-		public function postResults(result:String):void
+		public function postResults(result:String,done:Function):void
 		{
 			this.currentMethod = APIMethod.POSTRESULTS;
+			this.callback = done;
 			//var variables:URLVariables = new URLVariables("files='{\"result\": {\"status\": \"success\"}}'");
 			/*var mystr:String;
 			mystr = "{\"result\": {\"status\": \"success\"}}";*/
@@ -161,7 +165,25 @@
 
 		private function httpLoaderIOErrorHandler(event:IOErrorEvent):void
 		{
-			trace("httpLoaderIOErrorHandler: " + event + " !");
+			//trace("httpLoaderIOErrorHandler: " + event + " !");
+			switch(currentMethod)
+			{
+				case APIMethod.GETVERSION:
+					trace("httpLoaderIOErrorHandler: " + event + " !");
+					break;
+				case APIMethod.GETRESULTS:
+					trace("httpLoaderIOErrorHandler: " + event + " !");
+					break;
+				case APIMethod.POSTRESULTS:
+					//trace(loader.data);
+					var done:Function = this.callback;
+					this.callback = null;
+					done(-1,"httpLoaderIOErrorHandler: " + event + " !");
+					break;
+				default: 
+					trace("uploadCompleteHandler: Out of range"); 
+					break; 
+			}
 		}
 		
 		private function securityErrorHandler(event:SecurityErrorEvent):void
@@ -181,10 +203,13 @@
 					trace(loader.data);
 					break;
 				case APIMethod.POSTRESULTS:
-					trace(loader.data);
+					//trace(loader.data);
+					var done:Function = this.callback;
+					this.callback = null;
+					done(0,loader.data);
 					break;
 				default: 
-					trace("httpCompleteHandler: Out of range"); 
+					trace("uploadCompleteHandler: Out of range"); 
 					break; 
 			}
 		}
