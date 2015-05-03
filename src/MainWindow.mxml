@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+                       xmlns:s="library://ns.adobe.com/flex/spark"
+                       xmlns:mx="library://ns.adobe.com/flex/mx"
+					   creationComplete="main();">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script source="MainWindowScript.as"/>
+	
+	<fx:Script>
+		<![CDATA[
+		private function main():void 
+		{
+			windows_initialized();
+		}
+		]]>
+	</fx:Script>
+	
+	<s:Group>
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+		<s:Group id="input_group">
+			<s:layout>
+				<s:HorizontalLayout></s:HorizontalLayout>
+			</s:layout>
+			<s:Label text="Host" width="60"></s:Label>
+			<s:TextInput id="input_text" text="" width="400"></s:TextInput>
+			<s:DropDownList id="method_dropdown" selectedIndex="0" width="80">
+				<s:dataProvider>
+					<s:ArrayList source="[HTTP,DNS]" />
+				</s:dataProvider>	
+			</s:DropDownList>
+			<s:Button id="test_button" label="Test"></s:Button>
+		</s:Group>	
+		<s:Group id="output_group">
+			<s:layout>
+				<s:HorizontalLayout></s:HorizontalLayout>
+			</s:layout>
+			<s:Label text="Result" width="60"></s:Label>
+			<s:TextArea id="output_text" text="" widthInChars="40"></s:TextArea>
+			<s:Button id="upload_button" label="Upload"></s:Button>
+		</s:Group>
+		<s:Group id="status_group">
+			<s:layout>
+				<s:HorizontalLayout></s:HorizontalLayout>
+			</s:layout>
+			<s:Label id="status_label" text="init" width="500"></s:Label>
+		</s:Group>
+	</s:Group>
+	
+</s:WindowedApplication>

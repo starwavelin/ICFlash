@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?> 
+<application xmlns="http://ns.adobe.com/air/application/16.0"> 
+	
+	<id>ICFlash2</id> 
+	<versionNumber>2.0</versionNumber> 
+	<filename>ICFlash2</filename> 
+	
+	<name>ICFlash2</name> 
+	<description></description> 
+	<copyright></copyright> 
+	
+	<initialWindow> 
+		<title>ICFlash2</title> 
+		<content>ICFlash2.swf</content> 
+		<systemChrome>standard</systemChrome> 
+		<transparent>false</transparent> 
+		<visible>true</visible> 
+		<minimizable>true</minimizable> 
+		<maximizable>false</maximizable> 
+		<resizable>true</resizable> 
+	</initialWindow> 
+	<customUpdateUI>false</customUpdateUI>
+	<allowBrowserInvocation>true</allowBrowserInvocation>
+	<!-- 
+	More options:
+	http://livedocs.adobe.com/flex/3/html/File_formats_1.html#1043413
+	-->
+</application>
