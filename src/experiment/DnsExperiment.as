@@ -45,7 +45,7 @@ package experiment
 			catch (error:Error)
 			{
 				//status_label.text = "Error: please check your input!\n";
-				var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, this.domainname, "FAILURE", "", "input error", "", "");
+				var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, [this.domainname], "FAILURE", "", "input error", [], "");
 				this.ongoing = false;
 				this.callback(result);
 			}
@@ -94,7 +94,7 @@ package experiment
 				}
 			}//end of for each loop
 			//output_text.text +=  dnsResult;
-			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, this.domainname, "SUCCESS", "", dnsResult, "", String(time_diff));
+			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, [this.domainname], "SUCCESS", "", dnsResult, [], String(time_diff));
 			this.ongoing = false;
 			this.callback(result);
 		}
@@ -102,7 +102,7 @@ package experiment
 		private function dnsErrorHandler(event:DNSResolverEvent):void
 		{
 			//status_label.text = "Error: " + event.toString() + "\n";
-			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, this.domainname, "FAILURE", "", event.toString(), "", "");
+			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, [this.domainname], "FAILURE", "", event.toString(), [], "");
 			this.ongoing = false;
 			this.callback(result);
 		}

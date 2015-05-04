@@ -161,6 +161,27 @@
 		private function httpStatusHandler(event:HTTPStatusEvent):void
 		{
 			trace("httpStatusHandler: " + event + " !");
+			switch(currentMethod)
+			{
+				case APIMethod.GETVERSION:
+					break;
+				case APIMethod.GETRESULTS:
+					break;
+				case APIMethod.POSTRESULTS:
+					var done:Function = this.callback;
+					this.callback = null;
+					if (event.status == 201)
+					{
+						done(0, String(event.status));
+					}
+					else
+					{
+						done(-2, String(event.status));
+					}
+					break;
+				default:
+					break; 
+			}
 		}
 
 		private function httpLoaderIOErrorHandler(event:IOErrorEvent):void
@@ -175,13 +196,13 @@
 					trace("httpLoaderIOErrorHandler: " + event + " !");
 					break;
 				case APIMethod.POSTRESULTS:
-					//trace(loader.data);
+					trace("httpLoaderIOErrorHandler: " + event + " !");
 					var done:Function = this.callback;
 					this.callback = null;
 					done(-1,"httpLoaderIOErrorHandler: " + event + " !");
 					break;
 				default: 
-					trace("uploadCompleteHandler: Out of range"); 
+					trace("httpLoaderIOErrorHandler: Out of range"); 
 					break; 
 			}
 		}
@@ -203,10 +224,7 @@
 					trace(loader.data);
 					break;
 				case APIMethod.POSTRESULTS:
-					//trace(loader.data);
-					var done:Function = this.callback;
-					this.callback = null;
-					done(0,loader.data);
+					trace("uploadCompleteHandler: " + loader.data);
 					break;
 				default: 
 					trace("uploadCompleteHandler: Out of range"); 

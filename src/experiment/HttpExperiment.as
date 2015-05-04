@@ -21,7 +21,7 @@ package experiment
 		private var ongoing:Boolean;
 		
 		private var currenturl:String;
-		private var responseheader:String;
+		private var responseheader:Array;
 		private var httpstatuscode:String;
 		private var timed:int;
 		
@@ -46,7 +46,7 @@ package experiment
 			}
 			this.ongoing = true;
 			this.currenturl = "";
-			this.responseheader = "";
+			this.responseheader = [];
 			this.httpstatuscode = "";
 			var url_fullform:String = url;
 			if (url.indexOf("://") < 0)
@@ -73,7 +73,7 @@ package experiment
 			{
 				//status_label.text = "Error: please check your input!\n";
 				//trace("Unable to load URL:" + error);
-				var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, currenturl, "FAILURE", "", "input error", "", "");
+				var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, [currenturl], "FAILURE", "", "input error", [], "");
 				this.ongoing = false;
 				this.callback(result);
 			}
@@ -101,14 +101,14 @@ package experiment
 			this.httpstatuscode = String(event.status);
 			//responseURL
 			//httpStatus +=  "Response URL: " + event.responseURL + "\n";
-			this.responseheader += "ResponseURL:" + event.responseURL + ",";
+			this.responseheader.push("ResponseURL:" + event.responseURL);
 			//URLRequestHeader
 			//httpStatus +=  "Headers: \n";
 			var headers:Array = event.responseHeaders;
 			for (var i:uint = 0; i < headers.length; i++)
 			{
 				//httpStatus +=  "    " + headers[i].name + ": " + headers[i].value + "\n";
-				this.responseheader += headers[i].name + ":" + headers[i].value + ",";
+				this.responseheader.push(headers[i].name + ":" + headers[i].value);
 			}
 			//httpStatus +=  "\n";
 			//output_text.text = httpStatus;
@@ -122,7 +122,7 @@ package experiment
 			}
 			timer.stop();
 			//status_label.text = "Error: " + event.toString() + "\n";
-			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, currenturl, "FAILURE", "", event.toString(), "", "");
+			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, [currenturl], "FAILURE", "", event.toString(), [], "");
 			this.ongoing = false;
 			this.callback(result);
 		}
@@ -140,7 +140,7 @@ package experiment
 			//trace(loader.data);
 			//output_text.text +=  loader.data;
 			//this.responseheader += "ResponseTime:" + String(time_diff) + ",";
-			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, currenturl, "SUCCESS", this.httpstatuscode, loader.data, this.responseheader, String(time_diff));
+			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, [currenturl], "SUCCESS", this.httpstatuscode, loader.data, this.responseheader, String(time_diff));
 			this.ongoing = false;
 			this.callback(result);
 		}
@@ -151,7 +151,7 @@ package experiment
 			{
 				return;
 			}
-			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, currenturl, "FAILURE", "", "Timeout", "", "5000");
+			var result:ExperimentResult = new ExperimentResult(EXP_ID, EXP_VER, [currenturl], "FAILURE", "", "Timeout", [], "5000");
 			this.ongoing = false;
 			this.callback(result);
 		}

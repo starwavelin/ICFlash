@@ -4,12 +4,23 @@ import experiment.HttpExperiment;
 import flash.display.MovieClip;
 import flash.display.Sprite;
 import flash.events.*;
+import flash.filesystem.File;
+import flash.filesystem.FileStream;
 import mx.collections.ArrayList;
+import mx.containers.TabNavigator;
+import mx.events.CollectionEvent;
+import spark.components.Group;
 import spark.events.GridEvent;
 import spark.events.GridSelectionEvent;
 
 import centinel.*;
 
+private const URLXML:String = "assets/urls.xml";
+
+private const UPLOAD_NO:String = "ready";
+private const UPLOAD_UPLOADING:String = "uploading";
+private const UPLOAD_ERROR:String = "error";
+private const UPLOAD_DONE:String = "done";
 
 private var debug:Boolean = true;
 private var timed:int = 0;
@@ -28,35 +39,35 @@ private function windows_initialized():void
 	//upload_button.addEventListener(MouseEvent.CLICK, upLoad);
 	trace("Application starts");
 	
-	uploadobject = new Upload("https://130.245.64.107:8082/","foo","bar");
+	//uploadobject = new Upload("https://130.245.64.107:8082/","foo","bar");
 	//uploadobject = new Upload("http://130.245.64.107:1234/","foo","bar");
 
-	// tab index
-	//input_text.tabIndex = 1;
-	//method_dropdown.tabIndex = 2;
-	//test_button.tabIndex = 3;
-	//output_text.tabIndex = 4;
-	
-	//status_label.htmlText='<font face="Arial" color="#FF0000" size="20">Fill:</font>';
-	/*
-	// add for test
-	var aLabel:Label = new Label();
-	var aCp:ColorPicker = new ColorPicker();
-
-	addChild(aLabel);
-	addChild(aCp);
-
-	aLabel.htmlText = '<font face="Arial" color="#FF0000" size="14">Fill:</font>';
-	aLabel.x = 200;
-	aLabel.y = 150;
-	aLabel.width = 25;
-	aLabel.height = 22;
-
-	aCp.x = 230;
-	aCp.y = 150;
-	// end add for test
-	*/
+	//this.addEventListener(Event.RESIZE, windows_resized);
 }
+
+/*private function windows_resized(event:Event):void
+{
+	var input_group:Group = this.input_group;
+	var output_group:Group = this.output_group;
+	var status_group:Group = this.status_group;
+	
+	input_group.width = this.stage.width;
+	output_group.width = this.stage.width;
+	status_group.width = this.stage.width;
+	
+	input_group.y = 0;
+	input_group.height = (this.stage.height - 100) * 0.40;
+	output_group.y = (this.stage.height - 100) * 0.40;
+	output_group.height = (this.stage.height - 100) * 0.60;
+	status_group.y = (this.stage.height - 100);
+	status_group.height = 100;
+	
+	var input_tab_group:TabNavigator = this.input_tab_group;
+	input_tab_group.percentWidth = 100;
+	input_tab_group.percentHeight = 100;
+	
+	
+}*/
 
 //event handler
 private function test2_button_onclick(event:MouseEvent):void
@@ -125,14 +136,16 @@ private function upload_button_onclick(event:MouseEvent):void
 		//uploadobject.postResults(lastresult.json());
 		upload_button.enabled = false;
 		clearresult_button.enabled = false;
-		var arr:Array = new Array(results_list.length - upload_index);
+		uploadobject = new Upload(uploadserver_text.text, "foo", "bar");
+		var arr:Array = new Array(result_grid_data.length - upload_index);
 		for (var i:int = upload_index; i < result_grid_data.length; i++)
 		{
 			var result_item:* = result_grid_data.getItemAt(i);
 			arr[i - upload_index] = result_item;
-			result_grid_data.getItemAt(i).uploaded = "uploading";
+			result_grid_data.getItemAt(i).uploaded = UPLOAD_UPLOADING;
 		}
-		upload_index = url_list_data.length;
+		result_grid.dataProvider.dispatchEvent( new CollectionEvent(CollectionEvent.COLLECTION_CHANGE));
+		upload_index = result_grid_data.length;
 		var json_string:String = JSON.stringify(arr);
 		uploadobject.postResults(json_string, upload_finish_handler);
 	}
@@ -148,6 +161,7 @@ private function clearresult_button_onclick(event:MouseEvent):void
 	results_list = new ArrayList();
 	result_grid_data = new ArrayList();
 	upload_index = 0;
+	output_text.text = "";
 }
 
 private function bulk_result_handler(result:ExperimentResult):void
@@ -194,7 +208,9 @@ private function dns_result_handler(result:ExperimentResult):void
 private function add_result_to_list(result:ExperimentResult):void
 {
 	results_list.addItem(result);
-	result_grid_data.addItem( { input:result.args, status:result.error, time:result.time, uploaded:"no", result_object:result } );
+	result_grid_data.addItem( { input:result.args, status:result.error, time:result.time, uploaded:UPLOAD_NO, result_object:result } );
+	result_grid.validateNow();
+	result_grid.ensureCellIsVisible(result_grid.dataProviderLength - 1);
 }
 
 private function display_result_detail(event:GridSelectionEvent):void
@@ -208,11 +224,11 @@ private function upload_finish_handler(error:int, data:String):void
 	{
 		for (var i:int = upload_index-1; i >= 0; i--)
 		{
-			if (result_grid_data.getItemAt(i).uploaded == "uploading")
+			if (result_grid_data.getItemAt(i).uploaded == UPLOAD_UPLOADING)
 			{
-				result_grid_data.getItemAt(i).uploaded = "yes";
+				result_grid_data.getItemAt(i).uploaded = UPLOAD_DONE;
 			}
-			else if (result_grid_data.getItemAt(i).uploaded == "yes")
+			else if (result_grid_data.getItemAt(i).uploaded == UPLOAD_DONE)
 			{
 				break;
 			}
@@ -222,137 +238,18 @@ private function upload_finish_handler(error:int, data:String):void
 	{
 		for (var j:int = upload_index-1; j >= 0; j--)
 		{
-			if (result_grid_data.getItemAt(j).uploaded == "uploading")
+			if (result_grid_data.getItemAt(j).uploaded == UPLOAD_UPLOADING)
 			{
-				result_grid_data.getItemAt(j).uploaded = "error";
+				result_grid_data.getItemAt(j).uploaded = UPLOAD_ERROR;
 				upload_index = j;
 			}
-			else if (result_grid_data.getItemAt(j).uploaded == "yes")
+			else if (result_grid_data.getItemAt(j).uploaded == UPLOAD_DONE)
 			{
 				break;
 			}
 		}
 	}
+	result_grid.dataProvider.dispatchEvent( new CollectionEvent(CollectionEvent.COLLECTION_CHANGE));
 	upload_button.enabled = true;
 	clearresult_button.enabled = true;
 }
-
-/*--- Part I: Do HTTP Load ---*//*
-private function doHttpLoad(url:String):void
-{
-	var url_fullform:String = url;
-	if (url.indexOf("://") < 0)
-	{
-		url_fullform = "http://" + url_fullform;
-	}
-	var request:URLRequest = new URLRequest(url_fullform);
-	request.contentType = "text/html";
-	request.method = URLRequestMethod.GET;
-	var loader:URLLoader = new URLLoader();
-	loader.dataFormat = URLLoaderDataFormat.TEXT;
-	loader.addEventListener(HTTPStatusEvent.HTTP_RESPONSE_STATUS, httpStatusHandler);
-	loader.addEventListener(IOErrorEvent.IO_ERROR, httpLoaderIOErrorHandler);
-	loader.addEventListener(Event.COMPLETE, httpCompleteHandler);
-	try
-	{
-		status_label.text = "Sending HTTP request to: " + input_text.text + "\n";
-		timed = getTimer();
-		loader.load(request);
-	}
-	catch (error:Error)
-	{
-		status_label.text = "Error: please check your input!\n";
-		//trace("Unable to load URL:" + error);
-	}
-}
-
-private function httpStatusHandler(event:HTTPStatusEvent):void
-{
-	var httpStatus:String = "";
-	//status
-	httpStatus +=  "Status Code: " + String(event.status) + "\n";
-	//responseURL
-	httpStatus +=  "Response URL: " + event.responseURL + "\n";
-	//URLRequestHeader
-	httpStatus +=  "Headers: \n";
-	var headers:Array = event.responseHeaders;
-	for (var i:uint = 0; i < headers.length; i++)
-	{
-		httpStatus +=  "    " + headers[i].name + ": " + headers[i].value + "\n";
-	}
-	httpStatus +=  "\n";
-	output_text.text = httpStatus;
-}
-
-private function httpLoaderIOErrorHandler(event:IOErrorEvent):void
-{
-	status_label.text = "Error: " + event.toString() + "\n";
-}
-
-private function httpCompleteHandler(event:Event):void
-{
-	var loader:URLLoader = URLLoader(event.target);
-	var time_diff:int = getTimer() - timed;
-	status_label.text = "Http time: " + time_diff + " ms";
-	//trace(loader.data);
-	output_text.text +=  loader.data;
-}
-
-/*--- Part II: Do DNS Query ---*//*
-private function doDnsQuery(url:String):void
-{
-	var resolver:DNSResolver = new DNSResolver();
-	resolver.addEventListener(DNSResolverEvent.LOOKUP, dnsLookupHandler);
-	resolver.addEventListener(ErrorEvent.ERROR, dnsErrorHandler);
-	status_label.text = "Sending DNS request for " + input_text.text + "\n";
-	timed = getTimer();
-	try
-	{
-		resolver.lookup(url, ARecord);
-	}
-	catch (error:Error)
-	{
-		status_label.text = "Error: please check your input!\n";
-	}
-}
-
-private function dnsLookupHandler(event:DNSResolverEvent):void
-{
-	var time_diff:int = getTimer() - timed;
-	status_label.text = "DNS Time: " + time_diff + " ms";
-	var dnsResult:String = "";
-	dnsResult +=  "Query string: " + event.host + "\n";
-	for each (var record:* in event.resourceRecords)
-	{
-		if (record is ARecord)
-		{
-			dnsResult += "    " + (record.name + " : " + record.address) + "\n";
-		}
-		if (record is AAAARecord)
-		{
-			dnsResult += "    " + (record.name + " : " + record.address) + "\n";
-		}
-		if (record is MXRecord)
-		{
-			dnsResult += "    " + (record.name + " : " + record.exchange + ", " 
-			+ record.preference) + "\n";
-		}
-		if (record is PTRRecord)
-		{
-			dnsResult += "    " + (record.name + " : " + record.ptrdName) + "\n";
-		}
-		if (record is SRVRecord)
-		{
-			dnsResult += "    " + (record.name + " : " + record.target + ", " 
-			+ record.port + ", " + record.priority + ", " 
-			+ record.weight) + "\n";
-		}
-	}//end of for each loop
-	output_text.text +=  dnsResult;
-}
-
-private function dnsErrorHandler(event:DNSResolverEvent):void
-{
-	status_label.text = "Error: " + event.toString() + "\n";
-}
-*/

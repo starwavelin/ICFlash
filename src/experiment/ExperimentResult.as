@@ -8,14 +8,14 @@ package experiment
 	{
 		private var description:String;
 		private var version:String;
-		private var parameter:String;
+		private var parameter:Array;
 		private var shortstatus:String;
 		private var returncode:String;
 		private var resultbody:String;
-		private var extrainfo:String;
+		private var extrainfo:Array;
 		private var finishtime:String;
 		
-		public function ExperimentResult(id:String,ver:String,args:String,status:String,error:String,body:String,extra:String,time:String) 
+		public function ExperimentResult(id:String,ver:String,args:Array,status:String,error:String,body:String,extra:Array,time:String) 
 		{
 			this.description = id;
 			this.version = ver;
@@ -40,7 +40,7 @@ package experiment
 		}
 		
 		/* Argument used in the experiment */
-		public function get args():String
+		public function get args():Array
 		{
 			return this.parameter;
 		}
@@ -64,7 +64,7 @@ package experiment
 		}
 		
 		/* extra info in the experiment */
-		public function get extra():String
+		public function get extra():Array
 		{
 			return this.extrainfo;
 		}
